@@ -12,6 +12,7 @@ import type {
 import {
   sendDiscord,
   sendDiscordBot,
+  sendTelegram,
   sendSlack,
   sendWebhook,
   dispatchNotifications,
@@ -107,6 +108,45 @@ describe('sendDiscordBot', () => {
     const result = await sendDiscordBot(config, basePayload);
     assert.equal(result.success, false);
     assert.ok(result.error?.includes('Missing botToken or channelId'));
+  });
+});
+
+// ---------------------------------------------------------------------------
+// sendTelegram
+// ---------------------------------------------------------------------------
+
+describe('sendTelegram', () => {
+  it('returns error when not enabled', async () => {
+    const config: TelegramNotificationConfig = {
+      enabled: false,
+      botToken: '123:abc',
+      chatId: '999',
+    };
+    const result = await sendTelegram(config, basePayload);
+    assert.equal(result.success, false);
+    assert.equal(result.platform, 'telegram');
+    assert.ok(result.error?.includes('Not configured'));
+  });
+
+  it('returns error when botToken is empty', async () => {
+    const config: TelegramNotificationConfig = {
+      enabled: true,
+      botToken: '',
+      chatId: '999',
+    };
+    const result = await sendTelegram(config, basePayload);
+    assert.equal(result.success, false);
+  });
+
+  it('returns error for invalid bot token format', async () => {
+    const config: TelegramNotificationConfig = {
+      enabled: true,
+      botToken: 'invalid-format',
+      chatId: '999',
+    };
+    const result = await sendTelegram(config, basePayload);
+    assert.equal(result.success, false);
+    assert.equal(result.error, 'Invalid bot token format');
   });
 });
 

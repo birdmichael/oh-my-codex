@@ -232,11 +232,15 @@ export async function sendTelegram(
   }
 
   try {
-    const body = JSON.stringify({
+    const bodyObj: Record<string, unknown> = {
       chat_id: config.chatId,
       text: payload.message,
       parse_mode: config.parseMode || "Markdown",
-    });
+    };
+    if (config.messageThreadId != null) {
+      bodyObj.message_thread_id = config.messageThreadId;
+    }
+    const body = JSON.stringify(bodyObj);
 
     const result = await new Promise<NotificationResult>((resolve) => {
       const req = httpsRequest(

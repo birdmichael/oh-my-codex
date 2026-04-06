@@ -63,6 +63,8 @@ export interface TelegramNotificationConfig {
   chatId: string;
   /** Parse mode: Markdown or HTML (default: Markdown) */
   parseMode?: "Markdown" | "HTML";
+  /** Message thread ID for sending to a specific topic in a supergroup */
+  messageThreadId?: number;
 }
 
 /** Slack platform configuration */
