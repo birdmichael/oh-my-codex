@@ -59,6 +59,9 @@ function migrateStopHookCallbacks(
       enabled: true,
       botToken: (telegram.botToken as string) || "",
       chatId: (telegram.chatId as string) || "",
+      ...(telegram.messageThreadId != null && {
+        messageThreadId: Number(telegram.messageThreadId),
+      }),
     };
     config.telegram = telegramConfig;
   }
@@ -153,10 +156,14 @@ export function buildConfigFromEnv(): FullNotificationConfig | null {
     process.env.OMX_TELEGRAM_NOTIFIER_CHAT_ID ||
     process.env.OMX_TELEGRAM_NOTIFIER_UID;
   if (telegramToken && telegramChatId) {
+    const telegramMessageThreadId = process.env.OMX_TELEGRAM_MESSAGE_THREAD_ID;
     config.telegram = {
       enabled: true,
       botToken: telegramToken,
       chatId: telegramChatId,
+      ...(telegramMessageThreadId && {
+        messageThreadId: Number(telegramMessageThreadId),
+      }),
     };
     hasAnyPlatform = true;
   }
@@ -615,6 +622,7 @@ export function getReplyListenerPlatformConfig(
   telegramEnabled: boolean;
   telegramBotToken?: string;
   telegramChatId?: string;
+  telegramMessageThreadId?: number;
   discordEnabled: boolean;
   discordBotToken?: string;
   discordChannelId?: string;
@@ -645,6 +653,7 @@ export function getReplyListenerPlatformConfig(
     telegramEnabled,
     telegramBotToken: telegramEnabled ? telegramConfig?.botToken : undefined,
     telegramChatId: telegramEnabled ? telegramConfig?.chatId : undefined,
+    telegramMessageThreadId: telegramEnabled ? telegramConfig?.messageThreadId : undefined,
     discordEnabled,
     discordBotToken: discordEnabled ? discordBotConfig?.botToken : undefined,
     discordChannelId: discordEnabled ? discordBotConfig?.channelId : undefined,

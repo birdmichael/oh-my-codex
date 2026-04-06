@@ -174,6 +174,20 @@ describe('buildConfigFromEnv', () => {
     });
   });
 
+  it('builds telegram config with message_thread_id from env var', () => {
+    process.env.OMX_TELEGRAM_BOT_TOKEN = '123:abc';
+    process.env.OMX_TELEGRAM_CHAT_ID = '999';
+    process.env.OMX_TELEGRAM_MESSAGE_THREAD_ID = '42';
+    const config = buildConfigFromEnv();
+    assert.ok(config);
+    assert.deepEqual(config.telegram, {
+      enabled: true,
+      botToken: '123:abc',
+      chatId: '999',
+      messageThreadId: 42,
+    });
+  });
+
   it('builds slack config from env var', () => {
     process.env.OMX_SLACK_WEBHOOK_URL = 'https://hooks.slack.com/services/test';
     const config = buildConfigFromEnv();
@@ -271,5 +285,36 @@ describe('getReplyListenerPlatformConfig', () => {
     assert.equal(platformConfig.telegramBotToken, 'tg-token');
     assert.equal(platformConfig.discordEnabled, false);
     assert.equal(platformConfig.discordBotToken, undefined);
+  });
+
+  it('returns messageThreadId for enabled telegram channel', () => {
+    const config = {
+      enabled: true,
+      telegram: {
+        enabled: true,
+        botToken: 'tg-token',
+        chatId: 'tg-chat',
+        messageThreadId: 42,
+      },
+    };
+
+    const platformConfig = getReplyListenerPlatformConfig(config);
+    assert.equal(platformConfig.telegramEnabled, true);
+    assert.equal(platformConfig.telegramMessageThreadId, 42);
+  });
+
+  it('returns undefined messageThreadId when not set', () => {
+    const config = {
+      enabled: true,
+      telegram: {
+        enabled: true,
+        botToken: 'tg-token',
+        chatId: 'tg-chat',
+      },
+    };
+
+    const platformConfig = getReplyListenerPlatformConfig(config);
+    assert.equal(platformConfig.telegramEnabled, true);
+    assert.equal(platformConfig.telegramMessageThreadId, undefined);
   });
 });

@@ -85,6 +85,7 @@ export interface ReplyListenerDaemonConfig extends ReplyConfig {
   telegramEnabled?: boolean;
   telegramBotToken?: string;
   telegramChatId?: string;
+  telegramMessageThreadId?: number;
   discordEnabled?: boolean;
   discordBotToken?: string;
   discordChannelId?: string;
@@ -722,11 +723,15 @@ export async function pollTelegramOnce(
         state.messagesInjected++;
         const acknowledgement = formatReplyAcknowledgement(captureReplyAcknowledgementSummaryImpl(mapping.tmuxPaneId));
         try {
-          const replyBody = JSON.stringify({
+          const replyBodyObj: Record<string, unknown> = {
             chat_id: config.telegramChatId,
             text: acknowledgement,
             reply_to_message_id: msg.message_id,
-          });
+          };
+          if (config.telegramMessageThreadId != null) {
+            replyBodyObj.message_thread_id = config.telegramMessageThreadId;
+          }
+          const replyBody = JSON.stringify(replyBodyObj);
 
           await new Promise<void>((resolve) => {
             const replyReq = httpsRequestImpl(
